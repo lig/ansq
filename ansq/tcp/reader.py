@@ -1,7 +1,7 @@
 import asyncio
-from typing import TYPE_CHECKING, Any, AsyncIterator, Mapping, Optional, Sequence
+from typing import TYPE_CHECKING, AsyncIterator, Optional, Sequence
 
-from ansq.tcp.types import Client
+from ansq.tcp.types import Client, ConnectionOptions
 
 if TYPE_CHECKING:
     from ansq.tcp.connection import NSQConnection
@@ -16,7 +16,7 @@ class Reader(Client):
         topic: str,
         channel: str,
         nsqd_tcp_addresses: Sequence[str],
-        connection_options: Mapping[str, Any] = None,
+        connection_options: ConnectionOptions = ConnectionOptions(),
     ):
         super().__init__(
             nsqd_tcp_addresses=nsqd_tcp_addresses,
@@ -28,7 +28,7 @@ class Reader(Client):
 
         # Common message queue for all connections
         self._message_queue: "asyncio.Queue[Optional[NSQMessage]]" = asyncio.Queue()
-        self._connection_options["message_queue"] = self._message_queue
+        self._connection_options.message_queue = self._message_queue
 
     async def messages(self) -> AsyncIterator["NSQMessage"]:
         """Return messages from message queue."""
@@ -90,14 +90,14 @@ class Reader(Client):
 
     @property
     def _is_auto_reconnect_enabled(self) -> bool:
-        return self._connection_options.get("auto_reconnect", True)
+        return self._connection_options.auto_reconnect
 
 
 async def create_reader(
     topic: str,
     channel: str,
     nsqd_tcp_addresses: Sequence[str],
-    connection_options: Mapping[str, Any] = None,
+    connection_options: ConnectionOptions = ConnectionOptions(),
 ) -> Reader:
     """Return created and connected reader."""
     reader = Reader(

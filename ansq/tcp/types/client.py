@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Sequence, Tuple
+from typing import TYPE_CHECKING, Dict, Sequence, Tuple
+
+from .connection import ConnectionOptions
 
 if TYPE_CHECKING:
     from ansq.tcp.connection import NSQConnection
@@ -10,12 +12,10 @@ class Client:
     def __init__(
         self,
         nsqd_tcp_addresses: Sequence[str],
-        connection_options: Mapping[str, Any] = None,
+        connection_options: ConnectionOptions = ConnectionOptions(),
     ):
         self._nsqd_tcp_addresses = nsqd_tcp_addresses
-        self._connection_options = (
-            dict(connection_options) if connection_options is not None else {}
-        )
+        self._connection_options = connection_options
         self._connections: Dict[str, NSQConnection] = {}
 
         if not self._nsqd_tcp_addresses:
@@ -39,7 +39,9 @@ class Client:
         """Connect and identify to nsqd by given host and port."""
         from ansq.tcp.connection import NSQConnection
 
-        connection = NSQConnection(host=host, port=port, **self._connection_options)
+        connection = NSQConnection(
+            host=host, port=port, connection_options=self._connection_options
+        )
 
         existing_connection = self._connections.get(connection.id)
         if existing_connection is not None:

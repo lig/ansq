@@ -1,8 +1,8 @@
 import random
-from typing import TYPE_CHECKING, Any, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 from ansq.tcp.connection import NSQConnection
-from ansq.tcp.types import Client
+from ansq.tcp.types import Client, ConnectionOptions
 
 if TYPE_CHECKING:
     from ansq.typedefs import TCPResponse
@@ -14,7 +14,7 @@ class Writer(Client):
     def __init__(
         self,
         nsqd_tcp_addresses: Sequence[str],
-        connection_options: Mapping[str, Any] = None,
+        connection_options: ConnectionOptions = ConnectionOptions(),
     ):
         super().__init__(
             nsqd_tcp_addresses=nsqd_tcp_addresses,
@@ -45,7 +45,8 @@ class Writer(Client):
 
 
 async def create_writer(
-    nsqd_tcp_addresses: Sequence[str], connection_options: Mapping[str, Any] = None
+    nsqd_tcp_addresses: Sequence[str],
+    connection_options: ConnectionOptions = ConnectionOptions(),
 ) -> Writer:
     """Return created and connected writer."""
     writer = Writer(
